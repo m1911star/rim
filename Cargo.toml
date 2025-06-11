@@ -1,0 +1,38 @@
+cargo-features = ["edition2024"]
+[package]
+name = "rim"
+version = "0.1.0"
+edition = "2021"
+authors = ["m1911star"]
+description = "A high-performance mathematical visualization tool built with Bevy game engine, inspired by Manim"
+homepage = "https://github.com/m1911star/rim"
+repository = "https://github.com/m1911star/rim"
+license = "MIT OR Apache-2.0"
+keywords = ["mathematics", "visualization", "animation", "bevy", "manim"]
+exclude = ["target/", ".git/", ".github/", "*.log", "screenshots/"]
+readme = "README.md"
+
+[dependencies]
+bevy = "0.16.1"
+bevy_egui = "0.34.1"
+lyon = "1.0.1"
+regex = "1.11.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.132"
+anyhow = "1.0.94"
+thiserror = "2.0.3"
+rand = "0.8.5"
+nalgebra = "0.33.2"
+
+# Math and computation
+[dependencies.approx]
+version = "0.5.1"
+
+# For LaTeX rendering (future feature)
+[dependencies.latex2mathml]
+version = "0.2.3"
+optional = true
+
+[features]
+default = []
+latex = ["latex2mathml"]
