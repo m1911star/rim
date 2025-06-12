@@ -146,6 +146,7 @@ pub fn create_axes(
             Position2D { x: 0.0, y: 0.0 },
             style,
             Transform::default(),
+            Visibility::Inherited,
         ))
         .id()
 }
@@ -179,6 +180,7 @@ pub fn create_axes_with_labels(
             Position2D { x: 0.0, y: 0.0 },
             style,
             Transform::default(),
+            Visibility::Inherited,
         ))
         .id()
 }
@@ -202,6 +204,7 @@ pub fn create_grid(commands: &mut Commands, spacing: f32, style: Style) -> Entit
             Position2D { x: 0.0, y: 0.0 },
             style,
             Transform::default(),
+            Visibility::Inherited,
         ))
         .id()
 }

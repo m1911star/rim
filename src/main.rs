@@ -58,6 +58,22 @@ impl Default for CameraState {
     }
 }
 
+/// 坐标系显示状态资源
+#[derive(Resource)]
+struct CoordinateSystemState {
+    pub show_axes: bool,
+    pub show_grid: bool,
+}
+
+impl Default for CoordinateSystemState {
+    fn default() -> Self {
+        Self {
+            show_axes: true,
+            show_grid: true,
+        }
+    }
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -81,6 +97,7 @@ fn main() {
         ))
         .init_resource::<UiVisibility>()
         .init_resource::<CameraState>()
+        .init_resource::<CoordinateSystemState>()
         .add_systems(Startup, (setup_scene, setup_fonts, setup_coordinate_system))
         .add_systems(
             Update,
@@ -89,6 +106,7 @@ fn main() {
                 handle_mouse_input,
                 update_camera_smooth,
                 update_coordinate_system,
+                handle_coordinate_system_toggle,
             ),
         )
         .add_systems(EguiContextPass, ui_system)
@@ -200,6 +218,54 @@ fn update_coordinate_system(
     }
 }
 
+/// 处理坐标系显示切换的键盘快捷键
+fn handle_coordinate_system_toggle(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut coordinate_state: ResMut<CoordinateSystemState>,
+    mut axes_query: Query<&mut Visibility, (With<Axes>, Without<Grid>)>,
+    mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
+) {
+    // A键切换坐标轴显示
+    if keyboard_input.just_pressed(KeyCode::KeyA) {
+        coordinate_state.show_axes = !coordinate_state.show_axes;
+        for mut visibility in axes_query.iter_mut() {
+            *visibility = if coordinate_state.show_axes {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+        }
+        info!(
+            "坐标轴显示状态: {}",
+            if coordinate_state.show_axes {
+                "显示"
+            } else {
+                "隐藏"
+            }
+        );
+    }
+
+    // G键切换网格显示
+    if keyboard_input.just_pressed(KeyCode::KeyG) {
+        coordinate_state.show_grid = !coordinate_state.show_grid;
+        for mut visibility in grid_query.iter_mut() {
+            *visibility = if coordinate_state.show_grid {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+        }
+        info!(
+            "网格显示状态: {}",
+            if coordinate_state.show_grid {
+                "显示"
+            } else {
+                "隐藏"
+            }
+        );
+    }
+}
+
 fn setup_fonts(mut contexts: EguiContexts) {
     let ctx = contexts.ctx_mut();
 
@@ -306,6 +372,9 @@ fn ui_system(
     mut contexts: EguiContexts,
     ui_visibility: Res<UiVisibility>,
     camera_state: Res<CameraState>,
+    mut coordinate_state: ResMut<CoordinateSystemState>,
+    mut axes_query: Query<&mut Visibility, (With<Axes>, Without<Grid>)>,
+    mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
 ) {
     // 只有当UI可见时才显示控制面板
     if ui_visibility.show_ui {
@@ -319,10 +388,42 @@ fn ui_system(
                 ui.collapsing("坐标系", |ui| {
                     ui.label("坐标轴设置");
                     if ui.button("显示/隐藏坐标轴").clicked() {
-                        // TODO: 切换坐标轴显示
+                        coordinate_state.show_axes = !coordinate_state.show_axes;
+                        // 更新所有坐标轴的可见性
+                        for mut visibility in axes_query.iter_mut() {
+                            *visibility = if coordinate_state.show_axes {
+                                Visibility::Inherited
+                            } else {
+                                Visibility::Hidden
+                            };
+                        }
+                        info!(
+                            "坐标轴显示状态: {}",
+                            if coordinate_state.show_axes {
+                                "显示"
+                            } else {
+                                "隐藏"
+                            }
+                        );
                     }
                     if ui.button("显示/隐藏网格").clicked() {
-                        // TODO: 切换网格显示
+                        coordinate_state.show_grid = !coordinate_state.show_grid;
+                        // 更新所有网格的可见性
+                        for mut visibility in grid_query.iter_mut() {
+                            *visibility = if coordinate_state.show_grid {
+                                Visibility::Inherited
+                            } else {
+                                Visibility::Hidden
+                            };
+                        }
+                        info!(
+                            "网格显示状态: {}",
+                            if coordinate_state.show_grid {
+                                "显示"
+                            } else {
+                                "隐藏"
+                            }
+                        );
                     }
                     if ui.button("重置坐标轴").clicked() {
                         // TODO: 重置坐标轴到默认状态
@@ -340,6 +441,25 @@ fn ui_system(
                     ui.label("坐标轴范围");
                     ui.label(format!("X: {:.1} 到 {:.1}", -half_width, half_width));
                     ui.label(format!("Y: {:.1} 到 {:.1}", -half_height, half_height));
+
+                    ui.separator();
+                    ui.label("显示状态");
+                    ui.label(format!(
+                        "坐标轴: {}",
+                        if coordinate_state.show_axes {
+                            "✅ 显示"
+                        } else {
+                            "❌ 隐藏"
+                        }
+                    ));
+                    ui.label(format!(
+                        "网格: {}",
+                        if coordinate_state.show_grid {
+                            "✅ 显示"
+                        } else {
+                            "❌ 隐藏"
+                        }
+                    ));
                 });
 
                 ui.collapsing("对象库", |ui| {
@@ -389,8 +509,32 @@ fn ui_system(
 
                 ui.separator();
                 ui.label("状态信息");
-                ui.label("✅ 坐标轴已加载");
-                ui.label("✅ 网格已显示");
+                ui.label(format!(
+                    "{} 坐标轴{}",
+                    if coordinate_state.show_axes {
+                        "✅"
+                    } else {
+                        "❌"
+                    },
+                    if coordinate_state.show_axes {
+                        "已显示"
+                    } else {
+                        "已隐藏"
+                    }
+                ));
+                ui.label(format!(
+                    "{} 网格{}",
+                    if coordinate_state.show_grid {
+                        "✅"
+                    } else {
+                        "❌"
+                    },
+                    if coordinate_state.show_grid {
+                        "已显示"
+                    } else {
+                        "已隐藏"
+                    }
+                ));
                 ui.label("🔍 缩放功能已启用");
                 ui.label("🎯 准备就绪");
 
@@ -398,6 +542,8 @@ fn ui_system(
                 ui.label("💡 操作提示");
                 ui.label("🖱️ 滚轮缩放坐标轴");
                 ui.label("⌨️ F1 键隐藏/显示UI");
+                ui.label("⌨️ A 键切换坐标轴");
+                ui.label("⌨️ G 键切换网格");
             });
     } else {
         // 当UI隐藏时，显示一个小的提示

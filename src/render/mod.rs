@@ -26,17 +26,18 @@ pub struct AxisNameLabel {
 /// 渲染坐标轴的系统
 fn render_axes(
     mut gizmos: Gizmos,
-    query: Query<(&Axes, &Position2D, &MathStyle, &MathObject)>,
+    query: Query<(&Axes, &Position2D, &MathStyle, &Visibility), With<MathObject>>,
     windows: Query<&Window>,
 ) {
-    let Ok(window) = windows.get_single() else {
+    let Ok(window) = windows.single() else {
         return;
     };
     let window_width = window.width();
     let window_height = window.height();
 
-    for (axes, position, style, math_obj) in query.iter() {
-        if !math_obj.visible {
+    for (axes, position, style, visibility) in query.iter() {
+        // 检查可见性 - 只有当实体可见时才渲染
+        if *visibility == Visibility::Hidden {
             continue;
         }
 
@@ -119,18 +120,19 @@ fn render_axes(
 /// 渲染网格的系统
 fn render_grid(
     mut gizmos: Gizmos,
-    query: Query<(&Grid, &Position2D, &MathStyle, &MathObject)>,
-    axes_query: Query<&Axes>,
+    query: Query<(&Grid, &Position2D, &MathStyle, &Visibility), With<MathObject>>,
+    _axes_query: Query<&Axes>,
     windows: Query<&Window>,
 ) {
-    let Ok(window) = windows.get_single() else {
+    let Ok(window) = windows.single() else {
         return;
     };
     let window_width = window.width();
     let window_height = window.height();
 
-    for (grid, position, style, math_obj) in query.iter() {
-        if !math_obj.visible {
+    for (grid, position, style, visibility) in query.iter() {
+        // 检查可见性 - 只有当实体可见时才渲染
+        if *visibility == Visibility::Hidden {
             continue;
         }
 
@@ -277,7 +279,7 @@ fn update_axis_labels(
     mut commands: Commands,
     axes_query: Query<(Entity, &Axes, &Position2D), Changed<Axes>>,
     label_query: Query<Entity, With<AxisLabel>>,
-    mut name_label_query: Query<&mut Transform, (With<AxisNameLabel>, Without<Axes>)>,
+    mut name_label_query: Query<(&mut Transform, &AxisNameLabel), Without<Axes>>,
 ) {
     for (axes_entity, axes, _position) in axes_query.iter() {
         let scale = 50.0;
@@ -285,6 +287,23 @@ fn update_axis_labels(
         // 删除旧的数字标签
         for label_entity in label_query.iter() {
             commands.entity(label_entity).despawn();
+        }
+
+        // 更新坐标轴名称标签的位置
+        for (mut transform, name_label) in name_label_query.iter_mut() {
+            match name_label.axis.as_str() {
+                "x" => {
+                    transform.translation = Vec3::new(axes.x_range.1 * scale + 25.0, -15.0, 1.0);
+                }
+                "y" => {
+                    transform.translation = Vec3::new(-15.0, axes.y_range.1 * scale + 25.0, 1.0);
+                }
+                "origin" => {
+                    // 原点标签位置保持不变
+                    transform.translation = Vec3::new(-15.0, -15.0, 1.0);
+                }
+                _ => {}
+            }
         }
 
         // 创建新的数字标签
