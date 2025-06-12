@@ -28,7 +28,7 @@ src/
 
 ### Format
 ```
-<emoji><emoji> <type>: <description>
+<emoji> <type>: <description>
 
 [optional body]
 ```
@@ -44,7 +44,7 @@ src/
 - `🔧 chore:` - Maintenance tasks
 - `🚀 deploy:` - Deployment related changes
 
-### Feature-Specific Emojis
+### Feature-Specific Emojis (Choose ONE that best represents the change)
 - `📸` - Screenshot/export functionality
 - `🎯` - Coordinate system features
 - `🎨` - Rendering system
@@ -55,12 +55,12 @@ src/
 
 ### Examples
 ```
-✨📸 feat: add screenshot functionality with UI controls
-🐛🎯 fix: coordinate axis labels positioning issue
+✨ feat: add screenshot functionality with UI controls and keyboard shortcuts
+🐛 fix: coordinate axis labels positioning issue
 📝 docs: update README with keyboard shortcuts
-♻️🎨 refactor: improve rendering system performance
-✨📊 feat: add circle rendering with updated README documentation
-🔧📝 chore: update .cursorrules with documentation requirements
+♻️ refactor: improve rendering system performance
+📸 feat: add circle rendering with updated README documentation
+🔧 chore: update .cursorrules with documentation requirements
 ```
 
 ## 🎨 Code Style Guidelines
