@@ -14,32 +14,65 @@ Create a high-performance interactive mathematical visualization tool that combi
 
 ## ✨ Current Features
 
-### 🎯 Coordinate System
-- ✅ **Axis Rendering** - X and Y axes with customizable arrows
-- ✅ **Axis Labels** - Customizable axis labels (default "x" and "y")
-- ✅ **Tick Marks** - Automatic tick marks and numerical labels
-- ✅ **Grid System** - Major and minor grid lines support
-- ✅ **Origin Marker** - Clear origin point indicator
-- ✅ **Visibility Control** - Show/hide axes and grid independently
+- ✅ **Coordinate System**: Complete axes and grid system with customizable ranges
+- ✅ **Interactive Controls**: Mouse wheel zoom, keyboard shortcuts
+- ✅ **Visibility Management**: Show/hide axes and grid independently  
+- ✅ **Export System**: PNG screenshot export with timestamp naming
+- ✅ **UI Control Panel**: Comprehensive sidebar with collapsible sections
+- ✅ **Basic Shapes**: Circle creation with position, radius, and color controls
+- 🚧 **Animation System**: Foundation laid, implementation in progress
+- 📋 **Function Graphs**: Mathematical function plotting (planned)
+- 📋 **Advanced Shapes**: Lines, rectangles, and complex geometries (planned)
 
-### 🎨 Rendering System
-- ✅ **Gizmos Rendering** - Efficient rendering using Bevy's built-in Gizmos system
-- ✅ **Colors & Transparency** - Custom color and opacity settings
-- ✅ **Dynamic Visibility** - Real-time show/hide objects with synchronized rendering
-- ✅ **Zoom Control** - Mouse wheel zoom with smooth scaling
+## 🎮 Usage
 
-### 🖱️ User Interface
-- ✅ **Intuitive Interface** - Clean and user-friendly interface
-- ✅ **Control Panel** - Left sidebar with various control options
-- ✅ **Coordinate Settings** - Dedicated coordinate system configuration
-- ✅ **Status Display** - Real-time system status information
-- ✅ **Keyboard Shortcuts** - Efficient hotkey controls
+### Basic Operations
+```rust
+// The application starts with a coordinate system
+// Use the left sidebar to control various aspects:
 
-### 📸 Export Features
-- ✅ **Screenshot Capture** - High-quality PNG screenshot export
-- ✅ **Auto Directory Creation** - Automatic screenshots folder management
-- ✅ **Timestamp Naming** - Automatic file naming with timestamps
-- ✅ **Multiple Triggers** - UI button and keyboard shortcut support
+// Coordinate System
+- Show/Hide axes and grid
+- View current zoom level and coordinate ranges
+- Reset coordinate system to default state
+
+// Basic Shapes - Circles
+- Set position (X, Y coordinates)
+- Adjust radius (0.1 to 5.0 units)
+- Choose stroke color with color picker
+- Toggle fill option for solid circles
+- Add multiple circles with automatic positioning
+- Clear all circles at once
+
+// Export Options
+- Take PNG screenshots with timestamp naming
+- Screenshots saved to screenshots/ directory
+```
+
+### Keyboard Shortcuts
+| Key | Action |
+|-----|--------|
+| `F1` | Toggle UI visibility |
+| `A` | Toggle axes visibility |
+| `G` | Toggle grid visibility |
+| `S` | Take screenshot |
+| `Mouse Wheel` | Zoom in/out |
+
+### Circle Controls
+The **Basic Shapes** panel provides comprehensive circle management:
+
+- **Position Control**: Set X and Y coordinates with drag values (-10.0 to 10.0)
+- **Radius Control**: Adjust circle size with drag value (0.1 to 5.0)
+- **Color Selection**: RGB color picker for stroke color
+- **Fill Option**: Toggle to show filled circles with transparency
+- **Smart Positioning**: Automatic position adjustment for new circles
+- **Batch Operations**: Clear all circles with one click
+
+### Export Features
+- **PNG Screenshots**: High-quality image export
+- **Automatic Naming**: Timestamp-based filenames
+- **Directory Management**: Auto-creation of screenshots folder
+- **User Feedback**: Status messages and operation confirmations
 
 ## 🚀 Quick Start
 

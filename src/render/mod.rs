@@ -1,11 +1,11 @@
-use crate::math_objects::{Axes, Grid, MathObject, Position2D, Style as MathStyle};
+use crate::math_objects::{Axes, Grid, MathCircle, MathObject, Position2D, Style as MathStyle};
 use bevy::prelude::*;
 
 pub struct RenderPlugin;
 
 impl Plugin for RenderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (render_axes, render_grid, render_math_objects))
+        app.add_systems(Update, (render_axes, render_grid, render_circles))
             .add_systems(PostUpdate, (spawn_axis_labels, update_axis_labels));
     }
 }
@@ -210,10 +210,44 @@ fn render_grid(
     }
 }
 
-/// 渲染数学对象的通用系统
-fn render_math_objects(_query: Query<(&MathObject, &Position2D, &MathStyle), Without<Axes>>) {
-    // 这里可以添加其他数学对象的渲染逻辑
-    // 比如圆形、直线、函数图形等
+/// 渲染圆形的系统
+fn render_circles(
+    mut gizmos: Gizmos,
+    query: Query<(&MathCircle, &Position2D, &MathStyle, &Visibility), With<MathObject>>,
+) {
+    for (circle, position, style, visibility) in query.iter() {
+        // 检查可见性 - 只有当实体可见时才渲染
+        if *visibility == Visibility::Hidden {
+            continue;
+        }
+
+        let scale = 50.0; // 单位长度对应的像素数
+        let position_vec: Vec2 = position.clone().into();
+        let radius_pixels = circle.radius * scale;
+
+        // 绘制圆形轮廓
+        gizmos.circle_2d(position_vec, radius_pixels, style.stroke_color);
+
+        // 如果有填充颜色，绘制填充圆形
+        if let Some(fill_color) = style.fill_color {
+            // 使用多个同心圆来模拟填充效果
+            let steps = 20;
+            for i in 0..steps {
+                let inner_radius = (i as f32 / steps as f32) * radius_pixels;
+                let alpha = fill_color.to_srgba().alpha * (1.0 - i as f32 / steps as f32) * 0.1;
+                let fill_color_with_alpha = Color::srgba(
+                    fill_color.to_srgba().red,
+                    fill_color.to_srgba().green,
+                    fill_color.to_srgba().blue,
+                    alpha,
+                );
+                gizmos.circle_2d(position_vec, inner_radius, fill_color_with_alpha);
+            }
+        }
+
+        // 绘制中心点
+        gizmos.circle_2d(position_vec, 2.0, style.stroke_color);
+    }
 }
 
 /// 生成坐标轴标签的系统

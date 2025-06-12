@@ -30,7 +30,8 @@ use animation::AnimationPlugin;
 use export::{ExportFormat, ExportPlugin, ExportRequest};
 use interaction::InteractionPlugin;
 use math_objects::{
-    create_axes_with_labels, create_grid, Axes, Grid, MathObjectPlugin, Style as MathStyle,
+    create_axes_with_labels, create_circle, create_grid, Axes, Grid, MathCircle, MathObjectPlugin,
+    Style as MathStyle,
 };
 use render::RenderPlugin;
 use scene::ScenePlugin;
@@ -91,6 +92,28 @@ impl Default for CoordinateSystemState {
     }
 }
 
+/// 圆形管理状态资源
+#[derive(Resource)]
+struct CircleState {
+    pub circles: Vec<Entity>,
+    pub next_position: Vec2,
+    pub default_radius: f32,
+    pub default_color: Color,
+    pub show_fill: bool,
+}
+
+impl Default for CircleState {
+    fn default() -> Self {
+        Self {
+            circles: Vec::new(),
+            next_position: Vec2::new(0.0, 0.0),
+            default_radius: 1.0,
+            default_color: Color::srgb(0.2, 0.8, 0.2), // 绿色
+            show_fill: false,
+        }
+    }
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -115,6 +138,7 @@ fn main() {
         .init_resource::<UiVisibility>()
         .init_resource::<CameraState>()
         .init_resource::<CoordinateSystemState>()
+        .init_resource::<CircleState>()
         .add_systems(Startup, (setup_scene, setup_fonts, setup_coordinate_system))
         .add_systems(
             Update,
@@ -403,10 +427,12 @@ fn setup_fonts(mut contexts: EguiContexts) {
 }
 
 fn ui_system(
+    mut commands: Commands,
     mut contexts: EguiContexts,
     ui_visibility: Res<UiVisibility>,
     camera_state: Res<CameraState>,
     mut coordinate_state: ResMut<CoordinateSystemState>,
+    mut circle_state: ResMut<CircleState>,
     mut axes_query: Query<&mut Visibility, (With<Axes>, Without<Grid>)>,
     mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
     mut export_events: EventWriter<ExportRequest>,
@@ -497,10 +523,110 @@ fn ui_system(
                     ));
                 });
 
-                ui.collapsing("对象库", |ui| {
-                    if ui.button("添加圆形").clicked() {
-                        // TODO: 添加圆形对象
+                ui.collapsing("基本图形", |ui| {
+                    ui.label("圆形控制");
+
+                    // 圆形位置控制
+                    ui.horizontal(|ui| {
+                        ui.label("位置 X:");
+                        ui.add(
+                            egui::DragValue::new(&mut circle_state.next_position.x)
+                                .speed(0.1)
+                                .range(-10.0..=10.0),
+                        );
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("位置 Y:");
+                        ui.add(
+                            egui::DragValue::new(&mut circle_state.next_position.y)
+                                .speed(0.1)
+                                .range(-10.0..=10.0),
+                        );
+                    });
+
+                    // 圆形半径控制
+                    ui.horizontal(|ui| {
+                        ui.label("半径:");
+                        ui.add(
+                            egui::DragValue::new(&mut circle_state.default_radius)
+                                .speed(0.1)
+                                .range(0.1..=5.0),
+                        );
+                    });
+
+                    // 颜色选择
+                    let mut color_array = [
+                        circle_state.default_color.to_srgba().red,
+                        circle_state.default_color.to_srgba().green,
+                        circle_state.default_color.to_srgba().blue,
+                    ];
+                    ui.horizontal(|ui| {
+                        ui.label("颜色:");
+                        ui.color_edit_button_rgb(&mut color_array);
+                    });
+                    circle_state.default_color =
+                        Color::srgb(color_array[0], color_array[1], color_array[2]);
+
+                    // 填充选项
+                    ui.checkbox(&mut circle_state.show_fill, "显示填充");
+
+                    // 添加圆形按钮
+                    if ui.button("🔵 添加圆形").clicked() {
+                        let style = MathStyle {
+                            stroke_color: circle_state.default_color,
+                            fill_color: if circle_state.show_fill {
+                                Some(Color::srgba(
+                                    circle_state.default_color.to_srgba().red,
+                                    circle_state.default_color.to_srgba().green,
+                                    circle_state.default_color.to_srgba().blue,
+                                    0.3, // 填充透明度
+                                ))
+                            } else {
+                                None
+                            },
+                            stroke_width: 2.0,
+                            opacity: 1.0,
+                        };
+
+                        let circle_entity = create_circle(
+                            &mut commands,
+                            circle_state.next_position,
+                            circle_state.default_radius,
+                            style,
+                        );
+
+                        circle_state.circles.push(circle_entity);
+                        info!(
+                            "添加圆形: 位置({:.1}, {:.1}), 半径{:.1}",
+                            circle_state.next_position.x,
+                            circle_state.next_position.y,
+                            circle_state.default_radius
+                        );
+
+                        // 自动调整下一个圆形的位置
+                        circle_state.next_position.x += 2.0;
+                        if circle_state.next_position.x > 8.0 {
+                            circle_state.next_position.x = -8.0;
+                            circle_state.next_position.y += 2.0;
+                        }
+                        if circle_state.next_position.y > 6.0 {
+                            circle_state.next_position.y = -6.0;
+                        }
                     }
+
+                    // 清除所有圆形按钮
+                    if ui.button("🗑️ 清除所有圆形").clicked() {
+                        for entity in &circle_state.circles {
+                            commands.entity(*entity).despawn();
+                        }
+                        circle_state.circles.clear();
+                        circle_state.next_position = Vec2::new(0.0, 0.0);
+                        info!("已清除所有圆形");
+                    }
+
+                    ui.separator();
+                    ui.label(format!("当前圆形数量: {}", circle_state.circles.len()));
+
                     if ui.button("添加直线").clicked() {
                         // TODO: 添加直线对象
                     }
@@ -586,16 +712,15 @@ fn ui_system(
                         "已隐藏"
                     }
                 ));
-                ui.label("🔍 缩放功能已启用");
-                ui.label("🎯 准备就绪");
+                ui.label(format!("🔵 圆形: {} 个", circle_state.circles.len()));
 
                 ui.separator();
-                ui.label("💡 操作提示");
-                ui.label("🖱️ 滚轮缩放坐标轴");
-                ui.label("⌨️ F1 键隐藏/显示UI");
-                ui.label("⌨️ A 键切换坐标轴");
-                ui.label("⌨️ G 键切换网格");
-                ui.label("⌨️ S 键保存截图");
+                ui.label("快捷键");
+                ui.label("F1 - 显示/隐藏UI");
+                ui.label("A - 显示/隐藏坐标轴");
+                ui.label("G - 显示/隐藏网格");
+                ui.label("S - 保存截图");
+                ui.label("鼠标滚轮 - 缩放");
             });
     } else {
         // 当UI隐藏时，显示一个小的提示
