@@ -30,7 +30,7 @@ use animation::AnimationPlugin;
 use export::{ExportFormat, ExportPlugin, ExportRequest};
 use interaction::InteractionPlugin;
 use math_objects::{
-    create_axes_with_labels, create_circle, create_grid, Axes, Grid, MathCircle, MathObjectPlugin,
+    create_axes_with_labels, create_circle, create_grid, Axes, Grid, MathObjectPlugin,
     Style as MathStyle,
 };
 use render::RenderPlugin;

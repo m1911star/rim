@@ -211,42 +211,28 @@ fn render_grid(
 }
 
 /// 渲染圆形的系统
-fn render_circles(
-    mut gizmos: Gizmos,
-    query: Query<(&MathCircle, &Position2D, &MathStyle, &Visibility), With<MathObject>>,
-) {
-    for (circle, position, style, visibility) in query.iter() {
-        // 检查可见性 - 只有当实体可见时才渲染
+pub fn render_circles(mut gizmos: Gizmos, circles: Query<(&MathCircle, &Transform, &Visibility)>) {
+    for (circle, transform, visibility) in circles.iter() {
         if *visibility == Visibility::Hidden {
             continue;
         }
 
-        let scale = 50.0; // 单位长度对应的像素数
-        let position_vec: Vec2 = position.clone().into();
-        let radius_pixels = circle.radius * scale;
+        let position = transform.translation.truncate();
+        let scaled_position = position * 50.0; // 应用坐标系缩放
+        let scaled_radius = circle.radius * 50.0;
 
-        // 绘制圆形轮廓
-        gizmos.circle_2d(position_vec, radius_pixels, style.stroke_color);
+        if circle.filled {
+            // 使用Bevy原生的circle_2d绘制填充圆形
+            // 先绘制填充部分（使用稍微透明的颜色）
+            let fill_color = circle.color.with_alpha(0.6);
+            gizmos.circle_2d(scaled_position, scaled_radius, fill_color);
 
-        // 如果有填充颜色，绘制填充圆形
-        if let Some(fill_color) = style.fill_color {
-            // 使用多个同心圆来模拟填充效果
-            let steps = 20;
-            for i in 0..steps {
-                let inner_radius = (i as f32 / steps as f32) * radius_pixels;
-                let alpha = fill_color.to_srgba().alpha * (1.0 - i as f32 / steps as f32) * 0.1;
-                let fill_color_with_alpha = Color::srgba(
-                    fill_color.to_srgba().red,
-                    fill_color.to_srgba().green,
-                    fill_color.to_srgba().blue,
-                    alpha,
-                );
-                gizmos.circle_2d(position_vec, inner_radius, fill_color_with_alpha);
-            }
+            // 再绘制边框以增强视觉效果
+            gizmos.circle_2d(scaled_position, scaled_radius, circle.color);
+        } else {
+            // 只绘制轮廓
+            gizmos.circle_2d(scaled_position, scaled_radius, circle.color);
         }
-
-        // 绘制中心点
-        gizmos.circle_2d(position_vec, 2.0, style.stroke_color);
     }
 }
 

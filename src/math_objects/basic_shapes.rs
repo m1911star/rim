@@ -33,14 +33,16 @@ impl Plugin for BasicShapesPlugin {
 #[derive(Component, Reflect, Clone)]
 pub struct MathCircle {
     pub radius: f32,
-    pub segments: u32,
+    pub color: Color,
+    pub filled: bool,
 }
 
 impl Default for MathCircle {
     fn default() -> Self {
         Self {
             radius: 1.0,
-            segments: 64,
+            color: Color::WHITE,
+            filled: true,
         }
     }
 }
@@ -79,7 +81,8 @@ pub fn create_circle(commands: &mut Commands, position: Vec2, radius: f32, style
             },
             MathCircle {
                 radius,
-                segments: 64,
+                color: style.stroke_color,
+                filled: style.fill_color.is_some(),
             },
             Position2D::from(position),
             style,
