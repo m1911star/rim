@@ -219,7 +219,11 @@ Please see [DEVELOPMENT.md](DEVELOPMENT.md) for development guidelines.
 
 ## 📄 License
 
-This project is dual-licensed under MIT or Apache 2.0. See LICENSE files for details.
+This project is licensed under the GNU General Public License v3.0 only. See the [LICENSE](LICENSE) file for details.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ## 🙏 Acknowledgments
 

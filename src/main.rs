@@ -1,3 +1,20 @@
+/*
+ * RIM - Mathematical Visualization Tool
+ * Copyright (C) 2024 m1911star
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContextPass, EguiContexts, EguiPlugin};
 use std::sync::Arc;
