@@ -18,17 +18,26 @@ Create a high-performance interactive mathematical visualization tool that combi
 - ✅ **Tick Marks** - Automatic tick marks and numerical labels
 - ✅ **Grid System** - Major and minor grid lines support
 - ✅ **Origin Marker** - Clear origin point indicator
+- ✅ **Visibility Control** - Show/hide axes and grid independently
 
 ### 🎨 Rendering System
 - ✅ **Gizmos Rendering** - Efficient rendering using Bevy's built-in Gizmos system
 - ✅ **Colors & Transparency** - Custom color and opacity settings
-- ✅ **Visibility Control** - Show/hide objects dynamically
+- ✅ **Dynamic Visibility** - Real-time show/hide objects with synchronized rendering
+- ✅ **Zoom Control** - Mouse wheel zoom with smooth scaling
 
 ### 🖱️ User Interface
 - ✅ **Intuitive Interface** - Clean and user-friendly interface
 - ✅ **Control Panel** - Left sidebar with various control options
 - ✅ **Coordinate Settings** - Dedicated coordinate system configuration
 - ✅ **Status Display** - Real-time system status information
+- ✅ **Keyboard Shortcuts** - Efficient hotkey controls
+
+### 📸 Export Features
+- ✅ **Screenshot Capture** - High-quality PNG screenshot export
+- ✅ **Auto Directory Creation** - Automatic screenshots folder management
+- ✅ **Timestamp Naming** - Automatic file naming with timestamps
+- ✅ **Multiple Triggers** - UI button and keyboard shortcut support
 
 ## 🚀 Quick Start
 
@@ -45,6 +54,27 @@ cd rim
 # Run the application
 cargo run
 ```
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Function | Description |
+|-----|----------|-------------|
+| `F1` | Toggle UI | Show/hide the control panel |
+| `A` | Toggle Axes | Show/hide coordinate axes |
+| `G` | Toggle Grid | Show/hide grid lines |
+| `S` | Screenshot | Save current view as PNG |
+| `Mouse Wheel` | Zoom | Zoom in/out of the coordinate system |
+
+## 📸 Screenshot Feature
+
+The screenshot feature allows you to capture high-quality images of your mathematical visualizations:
+
+- **Save Location**: Screenshots are automatically saved to the `screenshots/` directory
+- **File Format**: PNG format with automatic timestamp naming
+- **Usage**: 
+  - Click the "📸 保存截图" button in the Export Options panel
+  - Or press the `S` key for quick capture
+- **File Naming**: `rim_screenshot_[timestamp].png`
 
 ## 🎯 Usage Examples
 
@@ -115,9 +145,10 @@ create_grid(
 - **State Management**: Undo/redo functionality
 
 ### 6. Export Features
-- **Images**: High-quality PNG, SVG export
-- **Animations**: GIF, MP4 video export
-- **3D Models**: OBJ, STL format export
+- **Images**: High-quality PNG export (✅ implemented), SVG export (planned)
+- **Animations**: GIF, MP4 video export (planned)
+- **3D Models**: OBJ, STL format export (planned)
+- **Screenshot System**: Real-time capture with automatic file management (✅ implemented)
 
 ## 🛠️ Development Roadmap
 
@@ -126,6 +157,10 @@ create_grid(
 - [x] Core module definitions
 - [x] Basic UI interface
 - [x] Basic coordinate system
+- [x] Coordinate system visibility control
+- [x] Mouse wheel zoom functionality
+- [x] Keyboard shortcuts system
+- [x] Screenshot export feature
 - [ ] Basic shape rendering
 - [ ] Simple interaction system
 
@@ -134,16 +169,17 @@ create_grid(
 - [ ] Basic geometric shapes (circle, line, rectangle)
 - [ ] Simple function graph plotting
 - [ ] Color theme system
+- [ ] Enhanced export options (SVG, GIF)
 
 ### Phase 3: Advanced Features (v0.3.0)
 - [ ] Animation system foundation
-- [ ] Image export functionality
+- [ ] Video export functionality (MP4)
 - [ ] Scene save/load
 - [ ] Extended mathematical function support
 
 ### Phase 4: Full Release (v1.0.0)
 - [ ] Complete animation creation tools
-- [ ] Video export functionality
+- [ ] Advanced video export functionality
 - [ ] Plugin system
 - [ ] LaTeX rendering support
 
@@ -151,6 +187,7 @@ create_grid(
 
 - **Core Engine**: Bevy 0.16.1
 - **UI Framework**: bevy_egui
+- **Screenshot System**: Bevy's built-in screenshot API
 - **Mathematics**: nalgebra
 - **Geometry Rendering**: lyon
 - **Serialization**: serde

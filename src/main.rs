@@ -10,7 +10,7 @@ mod render;
 mod scene;
 
 use animation::AnimationPlugin;
-use export::ExportPlugin;
+use export::{ExportFormat, ExportPlugin, ExportRequest};
 use interaction::InteractionPlugin;
 use math_objects::{
     create_axes_with_labels, create_grid, Axes, Grid, MathObjectPlugin, Style as MathStyle,
@@ -224,6 +224,7 @@ fn handle_coordinate_system_toggle(
     mut coordinate_state: ResMut<CoordinateSystemState>,
     mut axes_query: Query<&mut Visibility, (With<Axes>, Without<Grid>)>,
     mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
+    mut export_events: EventWriter<ExportRequest>,
 ) {
     // A键切换坐标轴显示
     if keyboard_input.just_pressed(KeyCode::KeyA) {
@@ -263,6 +264,22 @@ fn handle_coordinate_system_toggle(
                 "隐藏"
             }
         );
+    }
+
+    // S键保存截图
+    if keyboard_input.just_pressed(KeyCode::KeyS) {
+        export_events.write(ExportRequest {
+            format: ExportFormat::PNG,
+            filename: format!(
+                "rim_screenshot_{}.png",
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+            ),
+            resolution: (1920, 1080),
+        });
+        info!("截图快捷键触发 - 截图请求已发送");
     }
 }
 
@@ -375,6 +392,7 @@ fn ui_system(
     mut coordinate_state: ResMut<CoordinateSystemState>,
     mut axes_query: Query<&mut Visibility, (With<Axes>, Without<Grid>)>,
     mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
+    mut export_events: EventWriter<ExportRequest>,
 ) {
     // 只有当UI可见时才显示控制面板
     if ui_visibility.show_ui {
@@ -499,12 +517,28 @@ fn ui_system(
                 });
 
                 ui.collapsing("导出选项", |ui| {
-                    if ui.button("导出图像").clicked() {
-                        // TODO: 导出图像
+                    if ui.button("📸 保存截图").clicked() {
+                        export_events.write(ExportRequest {
+                            format: ExportFormat::PNG,
+                            filename: format!(
+                                "rim_screenshot_{}.png",
+                                std::time::SystemTime::now()
+                                    .duration_since(std::time::UNIX_EPOCH)
+                                    .unwrap()
+                                    .as_secs()
+                            ),
+                            resolution: (1920, 1080),
+                        });
+                        info!("截图请求已发送");
                     }
                     if ui.button("导出动画").clicked() {
                         // TODO: 导出动画
                     }
+                    ui.separator();
+                    ui.label("💡 截图说明");
+                    ui.label("• 截图将保存到 screenshots/ 目录");
+                    ui.label("• 支持PNG格式");
+                    ui.label("• 自动生成时间戳文件名");
                 });
 
                 ui.separator();
@@ -544,6 +578,7 @@ fn ui_system(
                 ui.label("⌨️ F1 键隐藏/显示UI");
                 ui.label("⌨️ A 键切换坐标轴");
                 ui.label("⌨️ G 键切换网格");
+                ui.label("⌨️ S 键保存截图");
             });
     } else {
         // 当UI隐藏时，显示一个小的提示
