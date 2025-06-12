@@ -4,6 +4,8 @@
 
 基于 Bevy 游戏引擎的数学可视化工具，灵感来自 Manim。
 
+![RIM 预览](screenshots/rim_screenshot_1749743564.png)
+
 ## 🎯 项目目标
 
 创建一个高性能的交互式数学可视化工具，结合：
@@ -237,7 +239,8 @@ create_grid(
 
 ## 📸 截图
 
-*随着项目开发将添加截图*
+### 主界面
+![RIM 主界面](screenshots/rim_screenshot_1749743564.png)
 
 ## 🌟 Star 历史
 

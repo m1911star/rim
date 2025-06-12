@@ -4,6 +4,8 @@
 
 A high-performance mathematical visualization tool built with Bevy game engine, inspired by Manim.
 
+![RIM Preview](screenshots/rim_screenshot_1749743564.png)
+
 ## 🎯 Project Goals
 
 Create a high-performance interactive mathematical visualization tool that combines:
@@ -237,7 +239,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 ## 📸 Screenshots
 
-*Screenshots will be added as the project develops*
+### Main Interface
+![RIM Main Interface](screenshots/rim_screenshot_1749743564.png)
 
 ## 🌟 Star History
 
