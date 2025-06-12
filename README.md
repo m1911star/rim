@@ -83,7 +83,7 @@ The **Basic Shapes** panel provides comprehensive circle management:
 ### Installation & Running
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/rim.git
+git clone https://github.com/m1911star/rim.git
 cd rim
 
 # Run the application
@@ -277,7 +277,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=your-username/rim&type=Date)](https://star-history.com/#your-username/rim&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=m1911star/rim&type=Date)](https://star-history.com/#m1911star/rim&Date)
 
 ---
 

@@ -83,7 +83,7 @@
 ### 安装与运行
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/rim.git
+git clone https://github.com/m1911star/rim.git
 cd rim
 
 # 运行程序
@@ -256,7 +256,7 @@ create_grid(
 
 ## 🌟 Star 历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=your-username/rim&type=Date)](https://star-history.com/#your-username/rim&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=m1911star/rim&type=Date)](https://star-history.com/#m1911star/rim&Date)
 
 ---
 
