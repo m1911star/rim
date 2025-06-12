@@ -1,0 +1,173 @@
+# RIM - Mathematical Visualization Tool - Cursor Rules
+
+## 🎯 Project Overview
+RIM is a high-performance mathematical visualization tool built with Bevy game engine, inspired by Manim. It combines Manim's excellent mathematical animation design philosophy with Bevy's modern game engine architecture.
+
+## 📁 Project Structure
+```
+src/
+├── main.rs              # Main application entry point
+├── animation/           # Animation system (planned)
+├── export/             # Export functionality (PNG, SVG, GIF, MP4)
+├── interaction/        # User interaction handling
+├── math_objects/       # Mathematical objects (axes, shapes, functions)
+│   ├── axes.rs         # Coordinate system implementation
+│   ├── basic_shapes.rs # Basic geometric shapes
+│   └── function_graph.rs # Function plotting
+└── render/             # Rendering system using Bevy Gizmos
+```
+
+## 🛠️ Technology Stack
+- **Core Engine**: Bevy 0.16.1
+- **UI Framework**: bevy_egui
+- **Screenshot System**: Bevy's built-in screenshot API
+- **Mathematics**: nalgebra
+- **Language**: Rust (Edition 2024)
+
+## 📝 Commit Message Guidelines
+
+### Format
+```
+<emoji><emoji> <type>: <description>
+
+[optional body]
+```
+
+### Commit Types with Emojis
+- `✨ feat:` - New features
+- `🐛 fix:` - Bug fixes
+- `📝 docs:` - Documentation updates
+- `🎨 style:` - Code style changes (formatting, etc.)
+- `♻️ refactor:` - Code refactoring
+- `⚡ perf:` - Performance improvements
+- `✅ test:` - Adding or updating tests
+- `🔧 chore:` - Maintenance tasks
+- `🚀 deploy:` - Deployment related changes
+
+### Feature-Specific Emojis
+- `📸` - Screenshot/export functionality
+- `🎯` - Coordinate system features
+- `🎨` - Rendering system
+- `🖱️` - UI/interaction features
+- `⌨️` - Keyboard shortcuts
+- `🎬` - Animation features
+- `📊` - Mathematical objects
+
+### Examples
+```
+✨📸 feat: add screenshot functionality with UI controls
+🐛🎯 fix: coordinate axis labels positioning issue
+📝 docs: update README with keyboard shortcuts
+♻️🎨 refactor: improve rendering system performance
+✨📊 feat: add circle rendering with updated README documentation
+🔧📝 chore: update .cursorrules with documentation requirements
+```
+
+## 🎨 Code Style Guidelines
+
+### Rust Conventions
+- Use `snake_case` for functions and variables
+- Use `PascalCase` for types and structs
+- Use `SCREAMING_SNAKE_CASE` for constants
+- Prefer explicit types when clarity is important
+- Use `Result<T, E>` for error handling
+- Add comprehensive documentation for public APIs
+
+### Bevy Specific
+- Use Bevy's ECS (Entity Component System) patterns
+- Prefer systems over direct entity manipulation
+- Use resources for global state
+- Follow Bevy's plugin architecture
+- Use `Commands` for entity spawning/despawning
+
+### Project Specific
+- Mathematical objects should implement `MathObject` trait
+- Use `Style` struct for visual properties (color, opacity, etc.)
+- Coordinate system uses scale factor of 50.0 pixels per unit
+- UI controls should be in the left sidebar panel
+- Export functionality should auto-create directories
+
+## 🔧 Development Guidelines
+
+### Adding New Features
+1. Create appropriate module in `src/` directory
+2. Implement as Bevy plugin when possible
+3. Add UI controls in the sidebar
+4. Include keyboard shortcuts when applicable
+5. **Update README documentation immediately** - Both English and Chinese versions
+6. Add export functionality if relevant
+7. Update `.cursorrules` if new patterns or conventions are introduced
+
+### Code Changes Protocol
+- **ALWAYS update README.md and README_zh.md after implementing new features**
+- Update feature status from 📋 (planned) to 🚧 (in progress) to ✅ (completed)
+- Add new keyboard shortcuts to the shortcuts table
+- Update usage examples if API changes
+- Reflect current project status in roadmap
+- Add screenshots or examples when applicable
+
+### Documentation Requirements
+- **Immediate Updates**: README must be updated in the same commit as feature implementation
+- **Bilingual Support**: Both English (README.md) and Chinese (README_zh.md) versions must be maintained
+- **Feature Tracking**: Update current features status section
+- **Examples**: Provide code examples for new APIs
+- **Screenshots**: Add visual examples for UI changes
+
+### Mathematical Objects
+- Implement `Component` trait for ECS integration
+- Use `Position2D` for object positioning
+- Support visibility control via `Visibility` component
+- Include style customization options
+
+### UI Development
+- Use `egui` for immediate mode GUI
+- Group related controls in collapsible sections
+- Provide clear labels and tooltips
+- Include status indicators and feedback
+- Support both mouse and keyboard interaction
+
+### Export System
+- Support multiple formats (PNG implemented, SVG/GIF/MP4 planned)
+- Use event-driven architecture with `ExportRequest`
+- Auto-generate timestamps for file naming
+- Create directories automatically
+- Provide user feedback on export status
+
+## 🎯 Current Features Status
+- ✅ Coordinate system with axes and grid
+- ✅ Visibility controls (show/hide axes/grid)
+- ✅ Mouse wheel zoom functionality
+- ✅ Keyboard shortcuts (F1, A, G, S keys)
+- ✅ PNG screenshot export
+- ✅ UI control panel with egui
+- 🚧 Basic shape rendering (in progress)
+- 📋 Function graph plotting (planned)
+- 📋 Animation system (planned)
+
+## 🚀 Development Priorities
+1. Complete basic shape rendering (circles, lines, rectangles)
+2. Implement function graph plotting
+3. Add more export formats (SVG, GIF)
+4. Develop animation system foundation
+5. Add scene save/load functionality
+
+## 🎨 Design Philosophy
+- **Mathematical Professionalism**: Designed specifically for mathematical visualization
+- **High Performance**: Leverage Rust + ECS architecture benefits
+- **Real-time Interaction**: Game engine-level real-time rendering
+- **Intuitive API**: Easy-to-use mathematical object creation
+- **Cross-platform**: Desktop, mobile, and web support
+
+## 📚 Helpful Resources
+- [Bevy Documentation](https://bevyengine.org/)
+- [egui Documentation](https://docs.rs/egui/)
+- [Manim Community](https://www.manim.community/) (inspiration)
+
+## 🤝 Contributing Guidelines
+- Follow the commit message format with emojis
+- Write comprehensive tests for new features
+- **Update documentation for API changes - README must be updated in the same commit**
+- Ensure cross-platform compatibility
+- Maintain high performance standards
+- **Documentation-First Approach**: No feature is complete without updated README
+- Keep both English and Chinese documentation in sync 
