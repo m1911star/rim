@@ -30,8 +30,8 @@ use animation::AnimationPlugin;
 use export::{ExportFormat, ExportPlugin, ExportRequest};
 use interaction::InteractionPlugin;
 use math_objects::{
-    create_axes_with_labels, create_circle, create_grid, Axes, Grid, MathObjectPlugin,
-    Style as MathStyle,
+    create_axes_with_labels, create_circle, create_circle_with_resolution, create_grid, Axes, Grid,
+    MathObjectPlugin, Style as MathStyle,
 };
 use render::RenderPlugin;
 use scene::ScenePlugin;
@@ -100,6 +100,7 @@ struct CircleState {
     pub default_radius: f32,
     pub default_color: Color,
     pub show_fill: bool,
+    pub resolution: Option<u32>, // 圆形分辨率，None 表示自动
 }
 
 impl Default for CircleState {
@@ -110,6 +111,7 @@ impl Default for CircleState {
             default_radius: 1.0,
             default_color: Color::srgb(0.2, 0.8, 0.2), // 绿色
             show_fill: false,
+            resolution: None, // 默认使用自动分辨率
         }
     }
 }
@@ -527,6 +529,7 @@ fn ui_system(
                     ui.label("圆形控制");
 
                     // 圆形位置控制
+                    ui.label("📍 位置控制 (数学坐标系)");
                     ui.horizontal(|ui| {
                         ui.label("位置 X:");
                         ui.add(
@@ -543,6 +546,7 @@ fn ui_system(
                                 .range(-10.0..=10.0),
                         );
                     });
+                    ui.small("💡 坐标原点(0,0)在屏幕中心");
 
                     // 圆形半径控制
                     ui.horizontal(|ui| {
@@ -570,6 +574,28 @@ fn ui_system(
                     // 填充选项
                     ui.checkbox(&mut circle_state.show_fill, "显示填充");
 
+                    // 分辨率控制
+                    ui.horizontal(|ui| {
+                        ui.label("分辨率:");
+                        let mut use_auto = circle_state.resolution.is_none();
+                        ui.checkbox(&mut use_auto, "自动");
+
+                        if use_auto {
+                            circle_state.resolution = None;
+                        } else if circle_state.resolution.is_none() {
+                            circle_state.resolution = Some(64); // 默认高分辨率
+                        }
+
+                        if let Some(ref mut resolution) = circle_state.resolution {
+                            ui.add(
+                                egui::DragValue::new(resolution)
+                                    .speed(1.0)
+                                    .range(8..=256)
+                                    .suffix(" 段"),
+                            );
+                        }
+                    });
+
                     // 添加圆形按钮
                     if ui.button("🔵 添加圆形").clicked() {
                         let style = MathStyle {
@@ -588,11 +614,12 @@ fn ui_system(
                             opacity: 1.0,
                         };
 
-                        let circle_entity = create_circle(
+                        let circle_entity = create_circle_with_resolution(
                             &mut commands,
                             circle_state.next_position,
                             circle_state.default_radius,
                             style,
+                            circle_state.resolution,
                         );
 
                         circle_state.circles.push(circle_entity);

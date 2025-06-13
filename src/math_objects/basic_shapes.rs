@@ -35,6 +35,8 @@ pub struct MathCircle {
     pub radius: f32,
     pub color: Color,
     pub filled: bool,
+    /// 圆形的分辨率（线段数量），None 表示使用自动分辨率
+    pub resolution: Option<u32>,
 }
 
 impl Default for MathCircle {
@@ -43,6 +45,7 @@ impl Default for MathCircle {
             radius: 1.0,
             color: Color::WHITE,
             filled: true,
+            resolution: None, // 默认使用自动分辨率
         }
     }
 }
@@ -72,6 +75,17 @@ impl Default for Rectangle {
 
 /// 创建圆形的便利函数
 pub fn create_circle(commands: &mut Commands, position: Vec2, radius: f32, style: Style) -> Entity {
+    create_circle_with_resolution(commands, position, radius, style, None)
+}
+
+/// 创建带指定分辨率的圆形
+pub fn create_circle_with_resolution(
+    commands: &mut Commands,
+    position: Vec2,
+    radius: f32,
+    style: Style,
+    resolution: Option<u32>,
+) -> Entity {
     commands
         .spawn((
             MathObject {
@@ -83,6 +97,7 @@ pub fn create_circle(commands: &mut Commands, position: Vec2, radius: f32, style
                 radius,
                 color: style.stroke_color,
                 filled: style.fill_color.is_some(),
+                resolution,
             },
             Position2D::from(position),
             style,

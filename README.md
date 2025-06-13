@@ -35,6 +35,7 @@ Create a high-performance interactive mathematical visualization tool that combi
 - Show/Hide axes and grid
 - View current zoom level and coordinate ranges
 - Reset coordinate system to default state
+- Mathematical coordinate system: Origin (0,0) at screen center, X-axis positive to the right, Y-axis positive upward
 
 // Basic Shapes - Circles
 - Set position (X, Y coordinates)
@@ -65,6 +66,7 @@ The **Basic Shapes** panel provides comprehensive circle management:
 - **Radius Control**: Adjust circle size with drag value (0.1 to 5.0)
 - **Color Selection**: RGB color picker for stroke color
 - **Fill Option**: Toggle to show filled circles with transparency
+- **Resolution Control**: Automatic or manual circle precision adjustment (8-256 segments)
 - **Smart Positioning**: Automatic position adjustment for new circles
 - **Batch Operations**: Clear all circles with one click
 
@@ -146,6 +148,38 @@ create_grid(
         opacity: 0.3,
         ..default()
     }
+);
+```
+
+### Creating Circles
+```rust
+use math_objects::{create_circle, create_circle_with_resolution, Style as MathStyle};
+
+// Create a circle with automatic resolution
+create_circle(
+    &mut commands,
+    Vec2::new(0.0, 0.0),  // Position
+    1.5,                  // Radius
+    MathStyle {
+        stroke_color: Color::BLUE,
+        fill_color: Some(Color::srgba(0.0, 0.0, 1.0, 0.3)),
+        stroke_width: 2.0,
+        opacity: 1.0,
+    }
+);
+
+// Create a high-resolution circle for smooth rendering
+create_circle_with_resolution(
+    &mut commands,
+    Vec2::new(3.0, 0.0),  // Position
+    2.0,                  // Radius
+    MathStyle {
+        stroke_color: Color::RED,
+        fill_color: None,
+        stroke_width: 2.0,
+        opacity: 1.0,
+    },
+    Some(128),            // High resolution (128 segments)
 );
 ```
 

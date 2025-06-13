@@ -9,15 +9,6 @@
 RIM 基于 Bevy 的 ECS (Entity-Component-System) 架构：
 
 ```rust
-// Entity: 数学对象实体
-let circle_entity = commands.spawn((
-    // Components: 组件定义对象属性
-    MathObject { id: "circle_1", visible: true, layer: 0 },
-    Circle { radius: 2.0, segments: 64 },
-    Position2D { x: 0.0, y: 0.0 },
-    Style { stroke_color: Color::WHITE, stroke_width: 2.0, .. },
-    Transform::default(),
-)).id();
 
 // Systems: 系统处理组件逻辑
 fn update_circle_mesh(
@@ -40,30 +31,7 @@ pub struct MathObject {
 ```
 
 #### 2. 几何组件
-```rust
-// 圆形
-#[derive(Component, Reflect, Clone)]
-pub struct Circle {
-    pub radius: f32,
-    pub segments: u32,
-}
 
-// 直线
-#[derive(Component, Reflect, Clone)]
-pub struct Line {
-    pub start: Vec2,
-    pub end: Vec2,
-}
-
-// 函数图形
-#[derive(Component)]
-pub struct FunctionGraph {
-    pub domain_start: f32,
-    pub domain_end: f32,
-    pub sample_count: u32,
-    pub points: Vec<Vec2>,
-}
-```
 
 #### 3. 样式组件
 ```rust

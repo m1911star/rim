@@ -218,20 +218,43 @@ pub fn render_circles(mut gizmos: Gizmos, circles: Query<(&MathCircle, &Transfor
         }
 
         let position = transform.translation.truncate();
-        let scaled_position = position * 50.0; // 应用坐标系缩放
-        let scaled_radius = circle.radius * 50.0;
+        // 应用与坐标轴相同的缩放因子，保持坐标系一致性
+        let scale = 50.0;
+        let scaled_position = position * scale;
+        let scaled_radius = circle.radius * scale;
+
+        // 使用用户指定的分辨率，或根据圆形大小动态调整分辨率
+        let resolution = circle.resolution.unwrap_or_else(|| {
+            // 根据圆形大小动态调整分辨率，让圆形更加圆润
+            // 参考 Bevy 官方示例的最佳实践
+            if scaled_radius < 50.0 {
+                32 // 小圆形使用默认分辨率
+            } else if scaled_radius < 100.0 {
+                48 // 中等圆形使用中等分辨率
+            } else if scaled_radius < 200.0 {
+                64 // 大圆形使用高分辨率
+            } else {
+                96 // 超大圆形使用超高分辨率
+            }
+        });
 
         if circle.filled {
             // 使用Bevy原生的circle_2d绘制填充圆形
             // 先绘制填充部分（使用稍微透明的颜色）
             let fill_color = circle.color.with_alpha(0.6);
-            gizmos.circle_2d(scaled_position, scaled_radius, fill_color);
+            gizmos
+                .circle_2d(scaled_position, scaled_radius, fill_color)
+                .resolution(resolution);
 
             // 再绘制边框以增强视觉效果
-            gizmos.circle_2d(scaled_position, scaled_radius, circle.color);
+            gizmos
+                .circle_2d(scaled_position, scaled_radius, circle.color)
+                .resolution(resolution);
         } else {
             // 只绘制轮廓
-            gizmos.circle_2d(scaled_position, scaled_radius, circle.color);
+            gizmos
+                .circle_2d(scaled_position, scaled_radius, circle.color)
+                .resolution(resolution);
         }
     }
 }

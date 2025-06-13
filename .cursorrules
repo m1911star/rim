@@ -26,6 +26,8 @@ src/
 
 ## 📝 Commit Message Guidelines
 
+commit message should be in English.
+
 ### Format
 ```
 <emoji> <type>: <description>

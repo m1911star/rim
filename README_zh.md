@@ -35,6 +35,7 @@
 - 显示/隐藏坐标轴和网格
 - 查看当前缩放级别和坐标范围
 - 重置坐标系统到默认状态
+- 数学坐标系：原点(0,0)位于屏幕中心，X轴向右为正，Y轴向上为正
 
 // 基本图形 - 圆形
 - 设置位置（X、Y坐标）
@@ -65,6 +66,7 @@
 - **半径控制**: 使用拖拽值调整圆形大小（0.1到5.0）
 - **颜色选择**: RGB颜色选择器设置描边颜色
 - **填充选项**: 切换显示带透明度的填充圆形
+- **分辨率控制**: 自动或手动调整圆形精度（8-256段）
 - **智能定位**: 新圆形的自动位置调整
 - **批量操作**: 一键清除所有圆形
 
@@ -125,6 +127,38 @@ create_grid(
         opacity: 0.3,
         ..default()
     }
+);
+```
+
+### 创建圆形
+```rust
+use math_objects::{create_circle, create_circle_with_resolution, Style as MathStyle};
+
+// 创建自动分辨率的圆形
+create_circle(
+    &mut commands,
+    Vec2::new(0.0, 0.0),  // 位置
+    1.5,                  // 半径
+    MathStyle {
+        stroke_color: Color::BLUE,
+        fill_color: Some(Color::srgba(0.0, 0.0, 1.0, 0.3)),
+        stroke_width: 2.0,
+        opacity: 1.0,
+    }
+);
+
+// 创建高分辨率圆形以获得平滑渲染
+create_circle_with_resolution(
+    &mut commands,
+    Vec2::new(3.0, 0.0),  // 位置
+    2.0,                  // 半径
+    MathStyle {
+        stroke_color: Color::RED,
+        fill_color: None,
+        stroke_width: 2.0,
+        opacity: 1.0,
+    },
+    Some(128),            // 高分辨率（128段）
 );
 ```
 
