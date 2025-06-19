@@ -20,6 +20,7 @@ Create a high-performance interactive mathematical visualization tool that combi
 - ✅ **Export System**: PNG screenshot export with timestamp naming
 - ✅ **UI Control Panel**: Comprehensive sidebar with collapsible sections
 - ✅ **Basic Shapes**: Circle creation with position, radius, and color controls
+- ✅ **Performance Monitor**: Real-time FPS and memory usage tracking with history
 - 🚧 **Animation System**: Foundation laid, implementation in progress
 - 📋 **Function Graphs**: Mathematical function plotting (planned)
 - 📋 **Advanced Shapes**: Lines, rectangles, and complex geometries (planned)
@@ -57,6 +58,7 @@ Create a high-performance interactive mathematical visualization tool that combi
 | `A` | Toggle axes visibility |
 | `G` | Toggle grid visibility |
 | `S` | Take screenshot |
+| `P` | Toggle performance monitor |
 | `Mouse Wheel` | Zoom in/out |
 
 ### Circle Controls
@@ -75,6 +77,17 @@ The **Basic Shapes** panel provides comprehensive circle management:
 - **Automatic Naming**: Timestamp-based filenames
 - **Directory Management**: Auto-creation of screenshots folder
 - **User Feedback**: Status messages and operation confirmations
+
+### Performance Monitoring
+The **Performance Monitor** panel provides real-time system performance insights:
+
+- **Real-time FPS**: Frame rate monitoring with color-coded indicators (green: 60+, yellow: 30-60, red: <30)
+- **Memory Usage**: Real-time memory consumption tracking in MB
+- **Performance History**: Visual trends showing the last 10 data points for both FPS and memory
+- **Statistical Analysis**: Average, maximum, and minimum values over time
+- **History Management**: Clear performance history with one click
+- **Always Available**: Performance overlay can be shown even when UI is hidden
+- **Smart Display**: Performance data updates every second for optimal balance between accuracy and performance
 
 ## 🚀 Quick Start
 
@@ -100,6 +113,7 @@ cargo run
 | `A` | Toggle Axes | Show/hide coordinate axes |
 | `G` | Toggle Grid | Show/hide grid lines |
 | `S` | Screenshot | Save current view as PNG |
+| `P` | Performance Monitor | Toggle FPS and memory usage display |
 | `Mouse Wheel` | Zoom | Zoom in/out of the coordinate system |
 
 ## 📸 Screenshot Feature
