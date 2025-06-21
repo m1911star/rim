@@ -23,6 +23,7 @@ anyhow = "1.0.94"
 thiserror = "2.0.3"
 rand = "0.8.5"
 nalgebra = "0.33.2"
+sysinfo = "0.32.1"
 
 # Math and computation
 [dependencies.approx]

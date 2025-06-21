@@ -83,7 +83,8 @@ The **Performance Monitor** panel provides real-time system performance insights
 
 - **Real-time FPS**: Frame rate monitoring with color-coded indicators (green: 60+, yellow: 30-60, red: <30)
 - **Memory Usage**: Real-time memory consumption tracking in MB
-- **Performance History**: Visual trends showing the last 10 data points for both FPS and memory
+- **CPU Usage**: Real-time CPU usage monitoring with color-coded indicators (green: <50%, yellow: 50-80%, red: >80%)
+- **Performance History**: Visual trends showing the last 5 data points for FPS, memory, and CPU
 - **Statistical Analysis**: Average, maximum, and minimum values over time
 - **History Management**: Clear performance history with one click
 - **Always Available**: Performance overlay can be shown even when UI is hidden

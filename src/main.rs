@@ -19,6 +19,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContextPass, EguiContexts, EguiPlugin};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
+use sysinfo::System;
 
 mod animation;
 mod export;
@@ -55,11 +56,14 @@ struct PerformanceState {
     pub show_performance: bool,
     pub fps_history: Vec<f32>,
     pub memory_history: Vec<f32>,
+    pub cpu_history: Vec<f32>,
     pub last_update: Instant,
     pub frame_count: u32,
     pub fps: f32,
     pub memory_usage_mb: f32,
+    pub cpu_usage_percent: f32,
     pub max_history_len: usize,
+    pub system: System,
 }
 
 impl Default for PerformanceState {
@@ -68,11 +72,14 @@ impl Default for PerformanceState {
             show_performance: false,
             fps_history: Vec::new(),
             memory_history: Vec::new(),
+            cpu_history: Vec::new(),
             last_update: Instant::now(),
             frame_count: 0,
             fps: 0.0,
             memory_usage_mb: 0.0,
+            cpu_usage_percent: 0.0,
             max_history_len: 60, // 保持60个历史记录点
+            system: System::new_all(),
         }
     }
 }
@@ -359,40 +366,46 @@ fn handle_coordinate_system_toggle(
 }
 
 /// 更新性能监控数据
-fn update_performance_monitor(
-    _time: Res<Time>,
-    mut performance_state: ResMut<PerformanceState>,
-) {
+fn update_performance_monitor(_time: Res<Time>, mut performance_state: ResMut<PerformanceState>) {
     performance_state.frame_count += 1;
-    
+
     let now = Instant::now();
     let elapsed = now.duration_since(performance_state.last_update);
-    
-    // 每秒更新一次FPS和内存使用
+
+    // 每秒更新一次FPS、内存使用和CPU使用
     if elapsed >= Duration::from_secs(1) {
         // 计算FPS
         performance_state.fps = performance_state.frame_count as f32 / elapsed.as_secs_f32();
         performance_state.frame_count = 0;
         performance_state.last_update = now;
-        
+
         // 获取内存使用（简化版本 - 在生产环境中可能需要更精确的方法）
         // 这里我们使用一个估算值，在实际项目中可以使用系统调用获取真实内存使用
         performance_state.memory_usage_mb = get_memory_usage_estimate();
-        
+
+        // 更新系统信息并获取CPU使用率
+        performance_state.system.refresh_cpu_all();
+        performance_state.cpu_usage_percent = performance_state.system.global_cpu_usage();
+
         // 更新历史记录 - 分别获取值以避免借用检查问题
         let current_fps = performance_state.fps;
         let current_memory = performance_state.memory_usage_mb;
+        let current_cpu = performance_state.cpu_usage_percent;
         let max_history_len = performance_state.max_history_len;
-        
+
         performance_state.fps_history.push(current_fps);
         performance_state.memory_history.push(current_memory);
-        
+        performance_state.cpu_history.push(current_cpu);
+
         // 限制历史记录长度
         if performance_state.fps_history.len() > max_history_len {
             performance_state.fps_history.remove(0);
         }
         if performance_state.memory_history.len() > max_history_len {
             performance_state.memory_history.remove(0);
+        }
+        if performance_state.cpu_history.len() > max_history_len {
+            performance_state.cpu_history.remove(0);
         }
     }
 }
@@ -425,7 +438,8 @@ fn get_memory_usage_estimate() -> f32 {
     let time_factor = (std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
-        .as_secs() % 60) as f32;
+        .as_secs()
+        % 60) as f32;
     base_memory + (time_factor * 0.5) // 模拟内存使用的变化
 }
 
@@ -542,7 +556,91 @@ fn ui_system(
     mut grid_query: Query<&mut Visibility, (With<Grid>, Without<Axes>)>,
     mut export_events: EventWriter<ExportRequest>,
     mut performance_state: ResMut<PerformanceState>,
+    windows: Query<&Window>,
 ) {
+    // 获取窗口宽度用于右对齐计算
+    let window_width = if let Ok(window) = windows.single() {
+        window.resolution.width()
+    } else {
+        1200.0 // 默认宽度
+    };
+
+    // 右侧提示面板 - 一直显示（宽度200px，右边缘对齐）
+    egui::Window::new("控制提示")
+        .fixed_pos([window_width - 140.0, 10.0]) // 右边缘完全对齐
+        .fixed_size([200.0, 100.0])
+        .collapsible(false)
+        .resizable(false)
+        .title_bar(false)
+        .show(contexts.ctx_mut(), |ui| {
+            ui.label("⌨️ F1 显示/隐藏UI");
+            ui.label(format!("🔍 缩放: {:.1}x", camera_state.zoom));
+            ui.label("🖱️ 滚轮缩放");
+            ui.label("⌨️ P 性能信息");
+        });
+
+    // 右侧性能监控面板 - 一直显示（如果开启）（宽度180px，右边缘对齐）
+    if performance_state.show_performance {
+        egui::Window::new("性能监控")
+            .fixed_pos([window_width - 210.0, 120.0]) // 右边缘完全对齐
+            .fixed_size([180.0, 140.0])
+            .collapsible(false)
+            .resizable(false)
+            .title_bar(false)
+            .show(contexts.ctx_mut(), |ui| {
+                ui.label("🚀 性能监控");
+                ui.separator();
+
+                // FPS显示
+                ui.horizontal(|ui| {
+                    ui.label("FPS:");
+                    let fps_color = if performance_state.fps >= 60.0 {
+                        egui::Color32::GREEN
+                    } else if performance_state.fps >= 30.0 {
+                        egui::Color32::YELLOW
+                    } else {
+                        egui::Color32::RED
+                    };
+                    ui.colored_label(fps_color, format!("{:.1}", performance_state.fps));
+                });
+
+                // 内存显示
+                ui.horizontal(|ui| {
+                    ui.label("内存:");
+                    let memory_color = if performance_state.memory_usage_mb < 100.0 {
+                        egui::Color32::GREEN
+                    } else if performance_state.memory_usage_mb < 200.0 {
+                        egui::Color32::YELLOW
+                    } else {
+                        egui::Color32::RED
+                    };
+                    ui.colored_label(
+                        memory_color,
+                        format!("{:.1} MB", performance_state.memory_usage_mb),
+                    );
+                });
+
+                // CPU显示
+                ui.horizontal(|ui| {
+                    ui.label("CPU:");
+                    let cpu_color = if performance_state.cpu_usage_percent < 50.0 {
+                        egui::Color32::GREEN
+                    } else if performance_state.cpu_usage_percent < 80.0 {
+                        egui::Color32::YELLOW
+                    } else {
+                        egui::Color32::RED
+                    };
+                    ui.colored_label(
+                        cpu_color,
+                        format!("{:.1}%", performance_state.cpu_usage_percent),
+                    );
+                });
+
+                ui.separator();
+                ui.small("P键切换显示");
+            });
+    }
+
     // 只有当UI可见时才显示控制面板
     if ui_visibility.show_ui {
         egui::SidePanel::left("control_panel")
@@ -820,7 +918,8 @@ fn ui_system(
                     ui.horizontal(|ui| {
                         ui.checkbox(&mut performance_state.show_performance, "显示性能信息");
                         if ui.button("📊").on_hover_text("切换性能监控显示").clicked() {
-                            performance_state.show_performance = !performance_state.show_performance;
+                            performance_state.show_performance =
+                                !performance_state.show_performance;
                         }
                     });
 
@@ -849,18 +948,37 @@ fn ui_system(
                         } else {
                             egui::Color32::RED
                         };
-                        ui.colored_label(memory_color, format!("{:.1} MB", performance_state.memory_usage_mb));
+                        ui.colored_label(
+                            memory_color,
+                            format!("{:.1} MB", performance_state.memory_usage_mb),
+                        );
+                    });
+
+                    ui.horizontal(|ui| {
+                        ui.label(format!("CPU: {:.1}%", performance_state.cpu_usage_percent));
+                        let cpu_color = if performance_state.cpu_usage_percent < 50.0 {
+                            egui::Color32::GREEN
+                        } else if performance_state.cpu_usage_percent < 80.0 {
+                            egui::Color32::YELLOW
+                        } else {
+                            egui::Color32::RED
+                        };
+                        ui.colored_label(
+                            cpu_color,
+                            format!("{:.1}%", performance_state.cpu_usage_percent),
+                        );
                     });
 
                     // 性能历史数据简化显示
                     if !performance_state.fps_history.is_empty() {
                         ui.separator();
-                        ui.label("📈 性能趋势 (最近60秒)");
-                        
+                        ui.label("📈 性能趋势 (最近5次)");
+
                         // 显示最近几个数据点的简化图表
                         ui.horizontal(|ui| {
                             ui.label("FPS:");
-                            let recent_fps = &performance_state.fps_history[performance_state.fps_history.len().saturating_sub(10)..];
+                            let recent_fps = &performance_state.fps_history
+                                [performance_state.fps_history.len().saturating_sub(5)..];
                             for (i, &fps) in recent_fps.iter().enumerate() {
                                 let color = if fps >= 60.0 {
                                     egui::Color32::GREEN
@@ -875,10 +993,11 @@ fn ui_system(
                                 }
                             }
                         });
-                        
+
                         ui.horizontal(|ui| {
                             ui.label("内存:");
-                            let recent_memory = &performance_state.memory_history[performance_state.memory_history.len().saturating_sub(10)..];
+                            let recent_memory = &performance_state.memory_history
+                                [performance_state.memory_history.len().saturating_sub(5)..];
                             for (i, &mem) in recent_memory.iter().enumerate() {
                                 let color = if mem < 100.0 {
                                     egui::Color32::GREEN
@@ -893,34 +1012,85 @@ fn ui_system(
                                 }
                             }
                         });
+
+                        ui.horizontal(|ui| {
+                            ui.label("CPU:");
+                            let recent_cpu = &performance_state.cpu_history
+                                [performance_state.cpu_history.len().saturating_sub(5)..];
+                            for (i, &cpu) in recent_cpu.iter().enumerate() {
+                                let color = if cpu < 50.0 {
+                                    egui::Color32::GREEN
+                                } else if cpu < 80.0 {
+                                    egui::Color32::YELLOW
+                                } else {
+                                    egui::Color32::RED
+                                };
+                                ui.colored_label(color, format!("{:.0}", cpu));
+                                if i < recent_cpu.len() - 1 {
+                                    ui.label("|");
+                                }
+                            }
+                        });
                     }
 
                     ui.separator();
                     ui.label("📋 统计信息");
                     if !performance_state.fps_history.is_empty() {
-                        let avg_fps = performance_state.fps_history.iter().sum::<f32>() / performance_state.fps_history.len() as f32;
-                        let max_fps = performance_state.fps_history.iter().fold(0.0f32, |a, &b| a.max(b));
-                        let min_fps = performance_state.fps_history.iter().fold(f32::INFINITY, |a, &b| a.min(b));
-                        
+                        let avg_fps = performance_state.fps_history.iter().sum::<f32>()
+                            / performance_state.fps_history.len() as f32;
+                        let max_fps = performance_state
+                            .fps_history
+                            .iter()
+                            .fold(0.0f32, |a, &b| a.max(b));
+                        let min_fps = performance_state
+                            .fps_history
+                            .iter()
+                            .fold(f32::INFINITY, |a, &b| a.min(b));
+
                         ui.label(format!("平均FPS: {:.1}", avg_fps));
                         ui.label(format!("最大FPS: {:.1}", max_fps));
                         ui.label(format!("最小FPS: {:.1}", min_fps));
                     }
 
                     if !performance_state.memory_history.is_empty() {
-                        let avg_memory = performance_state.memory_history.iter().sum::<f32>() / performance_state.memory_history.len() as f32;
-                        let max_memory = performance_state.memory_history.iter().fold(0.0f32, |a, &b| a.max(b));
-                        let min_memory = performance_state.memory_history.iter().fold(f32::INFINITY, |a, &b| a.min(b));
-                        
+                        let avg_memory = performance_state.memory_history.iter().sum::<f32>()
+                            / performance_state.memory_history.len() as f32;
+                        let max_memory = performance_state
+                            .memory_history
+                            .iter()
+                            .fold(0.0f32, |a, &b| a.max(b));
+                        let min_memory = performance_state
+                            .memory_history
+                            .iter()
+                            .fold(f32::INFINITY, |a, &b| a.min(b));
+
                         ui.label(format!("平均内存: {:.1} MB", avg_memory));
                         ui.label(format!("最大内存: {:.1} MB", max_memory));
                         ui.label(format!("最小内存: {:.1} MB", min_memory));
+                    }
+
+                    if !performance_state.cpu_history.is_empty() {
+                        let avg_cpu = performance_state.cpu_history.iter().sum::<f32>()
+                            / performance_state.cpu_history.len() as f32;
+                        let max_cpu = performance_state
+                            .cpu_history
+                            .iter()
+                            .fold(0.0f32, |a, &b| a.max(b));
+                        let min_cpu = performance_state
+                            .cpu_history
+                            .iter()
+                            .fold(f32::INFINITY, |a, &b| a.min(b));
+
+                        ui.label(format!("平均CPU: {:.1}%", avg_cpu));
+                        ui.label(format!("最大CPU: {:.1}%", max_cpu));
+                        ui.label(format!("最小CPU: {:.1}%", min_cpu));
                     }
 
                     // 清除历史数据按钮
                     if ui.button("🗑️ 清除历史数据").clicked() {
                         performance_state.fps_history.clear();
                         performance_state.memory_history.clear();
+                        performance_state.cpu_history.clear();
                         info!("性能监控历史数据已清除");
                     }
                 });
@@ -964,62 +1134,5 @@ fn ui_system(
                 ui.label("P - 显示/隐藏性能信息");
                 ui.label("鼠标滚轮 - 缩放");
             });
-    } else {
-        // 当UI隐藏时，显示一个小的提示
-        egui::Window::new("控制提示")
-            .fixed_pos([10.0, 10.0])
-            .fixed_size([200.0, 100.0])
-            .collapsible(false)
-            .resizable(false)
-            .title_bar(false)
-            .show(contexts.ctx_mut(), |ui| {
-                ui.label("⌨️ F1 显示UI");
-                ui.label(format!("🔍 缩放: {:.1}x", camera_state.zoom));
-                ui.label("🖱️ 滚轮缩放");
-                ui.label("⌨️ P 性能信息");
-            });
-
-        // 当性能监控开启时，即使UI隐藏也显示性能信息
-        if performance_state.show_performance {
-            egui::Window::new("性能监控")
-                .fixed_pos([10.0, 120.0])
-                .fixed_size([180.0, 120.0])
-                .collapsible(false)
-                .resizable(false)
-                .title_bar(false)
-                .show(contexts.ctx_mut(), |ui| {
-                    ui.label("🚀 性能监控");
-                    ui.separator();
-                    
-                    // FPS显示
-                    ui.horizontal(|ui| {
-                        ui.label("FPS:");
-                        let fps_color = if performance_state.fps >= 60.0 {
-                            egui::Color32::GREEN
-                        } else if performance_state.fps >= 30.0 {
-                            egui::Color32::YELLOW
-                        } else {
-                            egui::Color32::RED
-                        };
-                        ui.colored_label(fps_color, format!("{:.1}", performance_state.fps));
-                    });
-                    
-                    // 内存显示
-                    ui.horizontal(|ui| {
-                        ui.label("内存:");
-                        let memory_color = if performance_state.memory_usage_mb < 100.0 {
-                            egui::Color32::GREEN
-                        } else if performance_state.memory_usage_mb < 200.0 {
-                            egui::Color32::YELLOW
-                        } else {
-                            egui::Color32::RED
-                        };
-                        ui.colored_label(memory_color, format!("{:.1} MB", performance_state.memory_usage_mb));
-                    });
-                    
-                    ui.separator();
-                    ui.small("P键切换显示");
-                });
-        }
     }
 }
